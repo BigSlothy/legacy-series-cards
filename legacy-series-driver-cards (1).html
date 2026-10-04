@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Driver Cards — Legacy Series</title>
+<meta name="description" content="The Legacy Series — live driver cards, season standings, Ruby-to-Bronze rank tiers, and full career performance logs for the league.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Legacy Series — Driver Cards">
+<meta property="og:description" content="Live driver cards, season standings, Ruby-to-Bronze rank tiers, and full career performance logs for the league.">
+<meta property="og:site_name" content="The Legacy Series">
+<meta name="theme-color" content="#0A0C0E">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0C0E; --panel:#14181D; --panel-2:#1B2028;
+    --steel-line:#3A4350; --paper:#ECE9E2; --paper-dim:#A8AEB8;
+    --red:#D8342A; --amber:#E8A33D;
+  }
+  html,body{height:100%;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--ink); color:var(--paper);
+    font-family:'Inter',sans-serif;
+    padding: max(28px, env(safe-area-inset-top)) 20px max(40px, env(safe-area-inset-bottom));
+    min-height:100%;
+  }
+  .intro{max-width:640px; margin:0 auto 20px; text-align:center; color:var(--paper-dim); font-size:13px; line-height:1.5;}
+  .intro b{color:var(--paper); font-weight:600;}
+
+  .list-header{ max-width:1180px; margin:0 auto 18px; text-align:center; }
+  .list-header h1{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:24px; letter-spacing:.5px;
+    margin:0; color:var(--paper);
+  }
+  .legend{
+    max-width:1180px; margin:0 auto 20px; padding:12px 16px; border-radius:6px;
+    background:var(--panel); border:1px solid var(--steel-line);
+    display:flex; flex-wrap:wrap; justify-content:center; gap:14px 22px;
+  }
+  .legend-item{ display:flex; align-items:center; gap:6px; }
+  .legend-item span:first-of-type{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; letter-spacing:.3px; }
+  .legend-range{ font-family:'Inter',sans-serif; font-size:11.5px; color:var(--paper-dim); }
+
+  .controls{ max-width:1180px; margin:0 auto 20px; display:flex; justify-content:flex-end; position:relative; }
+  .sort-btn{
+    display:flex; align-items:center; gap:8px;
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:13px; letter-spacing:.4px; color:var(--paper);
+    background:var(--panel); border:1px solid var(--steel-line); border-radius:5px;
+    padding:9px 14px; cursor:pointer;
+  }
+  .sort-btn:hover{ border-color:var(--amber); }
+  .sort-btn svg{ transition:transform .15s ease; }
+  .sort-btn[aria-expanded="true"] svg{ transform:rotate(180deg); }
+  .sort-menu{
+    display:none; position:absolute; top:calc(100% + 6px); right:0; z-index:5;
+    background:var(--panel-2); border:1px solid var(--steel-line); border-radius:5px;
+    overflow:hidden; min-width:200px; box-shadow:0 14px 30px -10px rgba(0,0,0,.6);
+  }
+  .sort-menu.open{ display:block; }
+  .sort-menu button{
+    display:block; width:100%; text-align:left; background:none; border:none;
+    color:var(--paper); font-family:'Inter',sans-serif; font-size:13px;
+    padding:10px 14px; cursor:pointer;
+  }
+  .sort-menu button:hover{ background:var(--panel); color:var(--amber); }
+  .sort-menu button + button{ border-top:1px solid var(--steel-line); }
+
+  .grid{
+    max-width:1180px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+    gap:22px;
+  }
+
+  .card{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:3px solid var(--steel-line);
+    border-radius:6px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+    cursor:pointer;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(115deg, rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px, transparent 1px, transparent 34px);
+    pointer-events:none;
+  }
+
+  .head{ padding:22px 22px 14px; display:flex; gap:16px; align-items:center; position:relative;}
+  .number-plate{
+    flex:0 0 auto; width:56px; height:56px; border-radius:50%;
+    border:3px solid var(--paper); display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; color:var(--paper);
+    background:radial-gradient(circle at 30% 25%, #262b32, #14171b);
+  }
+  .id{flex:1; min-width:0;}
+  .id .name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; letter-spacing:.3px; line-height:1.1;}
+
+  .ratings{flex:0 0 auto; text-align:right;}
+  .ratings .row{margin-bottom:6px;}
+  .ratings .row:last-child{margin-bottom:0;}
+  .ratings .v{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; color:var(--paper); line-height:1;}
+  .ratings .l{font-size:9px; color:var(--paper-dim); letter-spacing:.5px; margin-top:2px;}
+
+  .subhead{ margin:0 22px 18px; padding-bottom:14px; border-bottom:1px solid var(--steel-line); }
+  .subhead .team{color:var(--paper-dim); font-size:12.5px;}
+  .subhead .team b{color:var(--amber); font-weight:600;}
+  .subhead .meta{color:var(--paper-dim); font-size:11.5px; margin-top:6px;}
+
+  .rank{
+    margin:0 22px 18px; padding:12px 14px; border-radius:5px;
+    background:var(--panel); border:1px solid var(--steel-line);
+    display:flex; align-items:center; gap:12px;
+  }
+  .rank .gem{flex:0 0 auto; width:30px; height:30px;}
+  .rank .gem polygon{stroke:rgba(0,0,0,.25); stroke-width:1;}
+  .rank .rtext{flex:1; min-width:0;}
+  .rank .tier{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:.5px;}
+  .rank .pos{font-size:11px; color:var(--paper-dim); margin-top:1px;}
+
+  .headline{
+    margin:0 22px 18px; padding:16px; border-radius:5px;
+    background:var(--panel); border:1px solid var(--steel-line);
+    display:grid; grid-template-columns:repeat(3,1fr); text-align:center;
+  }
+  .headline div + div{border-left:1px solid var(--steel-line);}
+  .headline .n{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px;}
+  .headline .l{font-size:10.5px; color:var(--paper-dim); margin-top:2px;}
+
+  .stats{ margin:0 22px 18px; display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
+  .stat{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--steel-line); }
+  .stat .l{font-size:11.5px; color:var(--paper-dim);}
+  .stat .v{font-family:'Rajdhani',sans-serif; font-weight:600; font-size:15px;}
+  .stat .v.hot{color:var(--red);}
+  .stat .v.good{color:#3EA66B;}
+
+  .section{ margin:0 22px 16px; }
+  .section .h{ font-size:11px; letter-spacing:.5px; color:var(--paper-dim); margin-bottom:8px; }
+  .section .empty{ font-size:12.5px; color:var(--paper-dim); font-style:italic; }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .chip{
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:12.5px;
+    padding:5px 10px; border-radius:3px; background:var(--amber); color:#241a08;
+  }
+  .chip.champ{ background:linear-gradient(135deg,#8b5cf6,#6d28d9); color:#fff; }
+  .chip.clean{ background:var(--panel); border:1px solid var(--steel-line); color:var(--paper); }
+
+  .rank-history{ display:flex; flex-wrap:wrap; gap:8px; }
+  .rank-chip{
+    display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:4px;
+    background:var(--panel); border:1px solid var(--steel-line);
+  }
+  .gem-sm{ width:16px; height:16px; flex:0 0 auto; }
+  .gem-sm polygon{ stroke:rgba(0,0,0,.25); stroke-width:1; }
+  .rank-chip-name{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12.5px; letter-spacing:.3px; }
+  .rank-chip-count{ font-family:'Rajdhani',sans-serif; font-weight:600; font-size:12.5px; color:var(--paper-dim); }
+
+  .foot{
+    margin-top:22px; padding:14px 22px; border-top:1px solid var(--steel-line);
+    font-family:'Rajdhani',sans-serif; letter-spacing:1.5px; font-size:11px; color:var(--paper-dim); text-align:center;
+  }
+
+  .log-btn{
+    display:block; width:100%; text-align:center; text-decoration:none; border:none; cursor:pointer;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:.5px;
+    color:#0b0d10; background:var(--amber); border-radius:5px; padding:11px 14px;
+  }
+  .log-btn:hover{ filter:brightness(1.08); }
+
+  .detail-wrap{ max-width:420px; margin:0 auto; }
+  .log-wrap{ max-width:900px; margin:0 auto; }
+
+  .year-acc{
+    border:1px solid var(--steel-line); border-radius:6px; margin-bottom:12px;
+    background:var(--panel-2); overflow:hidden;
+  }
+  .year-acc > summary{
+    padding:14px 16px; cursor:pointer; list-style:none;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; letter-spacing:.3px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .year-acc > summary::-webkit-details-marker{ display:none; }
+  .year-acc > summary::before{ content:'▸'; color:var(--amber); transition:transform .15s ease; font-size:12px; }
+  .year-acc[open] > summary::before{ transform:rotate(90deg); }
+  .year-body{ padding:0 14px 14px; }
+
+  .season-acc{ border:1px solid var(--steel-line); border-radius:5px; margin-top:10px; overflow:hidden; background:var(--panel); }
+  .season-acc > summary{
+    padding:10px 14px; cursor:pointer; list-style:none;
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:13px; letter-spacing:.3px; color:var(--paper-dim);
+    display:flex; align-items:center; flex-wrap:wrap; gap:4px 10px;
+  }
+  .season-acc > summary::-webkit-details-marker{ display:none; }
+  .season-acc > summary::before{ content:'▸'; color:var(--amber); transition:transform .15s ease; font-size:10px; }
+  .season-acc[open] > summary::before{ transform:rotate(90deg); }
+  .season-acc > summary .s-name{ color:var(--paper); flex:0 0 auto; font-weight:700; }
+  .season-acc > summary .s-stats{
+    font-weight:700; font-size:12.5px; letter-spacing:.6px; color:var(--paper); white-space:nowrap;
+    margin-left:28px;
+  }
+  .season-acc > summary .s-stats b{ color:var(--amber); font-weight:700; }
+  .count{ font-size:11px; color:var(--paper-dim); font-weight:500; }
+  .season-acc > summary .count{ margin-left:auto; }
+  .year-acc > summary .count{ margin-left:auto; }
+
+  .log-table-wrap{
+    overflow:auto; max-height:50vh; border-top:1px solid var(--steel-line);
+  }
+  .log-table{ width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap; }
+  .log-table th, .log-table td{ padding:7px 12px; text-align:left; border-bottom:1px solid var(--steel-line); }
+  .log-table th{
+    position:sticky; top:0; background:var(--panel-2); color:var(--paper-dim);
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:10.5px; letter-spacing:.4px; text-transform:uppercase;
+    z-index:1;
+  }
+  .log-table td{ font-family:'Rajdhani',sans-serif; font-weight:600; }
+  .log-table tr:nth-child(even){ background:rgba(255,255,255,.02); }
+  .log-table tr.dnf td{ color:var(--red); }
+  .log-table tr.totals-row td{ padding:0; background:var(--panel-2); border-bottom:none; }
+  .season-totals{
+    display:flex; flex-direction:column; gap:5px; padding:11px 14px;
+    font-family:'Inter',sans-serif; font-size:11.5px; color:var(--paper-dim); white-space:normal;
+  }
+  .season-totals b{ font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--paper); }
+  .season-totals .award-yes{ color:var(--amber); font-weight:600; }
+  .season-totals .award-no{ font-style:italic; }
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:16px;
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:13px; letter-spacing:.4px;
+    color:var(--paper-dim); background:none; border:none; cursor:pointer; padding:0;
+  }
+  .back-link:hover{ color:var(--amber); }
+  .page-title{ text-align:center; margin:0 auto 20px; max-width:420px; }
+  .page-title h1{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; margin:0 0 4px; letter-spacing:.3px; }
+  .page-title p{ margin:0; font-size:11px; letter-spacing:.5px; color:var(--paper-dim); }
+
+  @media (prefers-reduced-motion: no-preference){
+    .card{ transition: transform .35s ease; }
+    .card:hover{ transform: translateY(-4px); }
+  }
+</style>
+</head>
+<body>
+  <p class="intro" id="intro">Click any driver card to open that racer's career statistics. Swap or add entries in <b>DRIVERS</b> at the top of the script to generate a card per racer.</p>
+  <div id="app"></div>
+
+<script>
+// Bio info only — number, name, age, hometown, team, car. All performance numbers
+// (season stats, career stats, rank, awards) are randomly generated below so that
+// re-running the generator reshuffles every driver's results consistently.
+const DRIVERS = [
+  { number:"12", name:"John Bradford",    age:29, hometown:"Charlotte, NC, United States",       team:"Team Redline",            car:"Ford Mustang" },
+  { number:"27", name:"Devon Wallace",    age:34, hometown:"Indianapolis, IN, United States",     team:"Team Vantage",            car:"Chevrolet Camaro" },
+  { number:"55", name:"Lucas Ferreira",   age:24, hometown:"São Paulo, Brazil",                   team:"Apex Dynamics",           car:"Chevrolet Camaro" },
+  { number:"9",  name:"Ray Whitfield",    age:38, hometown:"Daytona Beach, FL, United States",    team:"Ironclad Racing",         car:"Toyota Camry" },
+  { number:"71", name:"Nate Kowalski",    age:22, hometown:"Winnipeg, MB, Canada",                team:"Steel City Motorsports",  car:"Ford Mustang" },
+  { number:"34", name:"Owen Marsh",       age:45, hometown:"Bristol, TN, United States",           team:"Blackwood Racing",        car:"Chevrolet Camaro" },
+  { number:"61", name:"Colin Draper",     age:27, hometown:"Toronto, ON, Canada",                 team:"Team Redline",            car:"Toyota Camry" },
+  { number:"88", name:"Tyler Bishop",     age:31, hometown:"Phoenix, AZ, United States",           team:"Team Vantage",            car:"Ford Mustang" },
+  { number:"17", name:"Aaron Voss",       age:36, hometown:"Tulsa, OK, United States",             team:"Steel City Motorsports",  car:"Chevrolet Camaro" },
+  { number:"45", name:"Jesse Marlow",     age:41, hometown:"Calgary, AB, Canada",                 team:"Blackwood Racing",        car:"Toyota Camry" },
+  { number:"3",  name:"Harlan Boyd",      age:19, hometown:"Talladega, AL, United States",         team:"Ironclad Racing",         car:"Ford Mustang" },
+  { number:"1",  name:"Marcus Webb",      age:33, hometown:"Nashville, TN, United States",          team:"Team Redline",            car:"Chevrolet Camaro" },
+  { number:"2",  name:"Dalton Reyes",     age:26, hometown:"Richmond, VA, United States",            team:"Team Vantage",            car:"Toyota Camry" },
+  { number:"4",  name:"Caleb Monroe",     age:40, hometown:"Columbus, OH, United States",            team:"Apex Dynamics",           car:"Ford Mustang" },
+  { number:"5",  name:"Isaac Bennett",    age:23, hometown:"Spokane, WA, United States",             team:"Ironclad Racing",         car:"Chevrolet Camaro" },
+  { number:"6",  name:"Trey Simmons",     age:37, hometown:"Boise, ID, United States",               team:"Steel City Motorsports",  car:"Toyota Camry" },
+  { number:"7",  name:"Logan Whitaker",   age:21, hometown:"Reno, NV, United States",                team:"Blackwood Racing",        car:"Ford Mustang" },
+  { number:"8",  name:"Grant Holloway",   age:44, hometown:"Mobile, AL, United States",              team:"Team Redline",            car:"Chevrolet Camaro" },
+  { number:"10", name:"Diego Marin",      age:28, hometown:"Rochester, NY, United States",           team:"Team Vantage",            car:"Toyota Camry" },
+  { number:"11", name:"Wesley Hale",      age:35, hometown:"Omaha, NE, United States",               team:"Apex Dynamics",           car:"Ford Mustang" },
+  { number:"13", name:"Connor Pruitt",    age:20, hometown:"Tucson, AZ, United States",              team:"Ironclad Racing",         car:"Chevrolet Camaro" },
+  { number:"14", name:"Blake Sorensen",   age:30, hometown:"Edmonton, AB, Canada",                   team:"Steel City Motorsports",  car:"Toyota Camry" },
+  { number:"15", name:"Austin Vance",     age:48, hometown:"Vancouver, BC, Canada",                  team:"Blackwood Racing",        car:"Ford Mustang" },
+  { number:"16", name:"Miles Donovan",    age:25, hometown:"Regina, SK, Canada",                     team:"Team Redline",            car:"Chevrolet Camaro" },
+  { number:"18", name:"Parker Lindqvist", age:32, hometown:"Hamilton, ON, Canada",                   team:"Team Vantage",            car:"Toyota Camry" },
+  { number:"19", name:"Garrett Nakamura", age:39, hometown:"Halifax, NS, Canada",                    team:"Apex Dynamics",           car:"Ford Mustang" },
+  { number:"20", name:"Evan Castellano",  age:24, hometown:"Baton Rouge, LA, United States",         team:"Ironclad Racing",         car:"Chevrolet Camaro" },
+  { number:"21", name:"Sawyer McAllister",age:42, hometown:"Wichita, KS, United States",             team:"Steel City Motorsports",  car:"Toyota Camry" },
+  { number:"23", name:"Julian Forsythe",  age:27, hometown:"Greenville, SC, United States",          team:"Blackwood Racing",        car:"Ford Mustang" },
+  { number:"24", name:"Spencer Odom",     age:22, hometown:"Fresno, CA, United States",              team:"Team Redline",            car:"Chevrolet Camaro" },
+];
+
+const TIERS = [
+  { name:'Ruby',     min:1,  max:5,  fill:'#FF5C7A' },
+  { name:'Diamond',  min:6,  max:10, fill:'#8FC7FF' },
+  { name:'Platinum', min:11, max:15, fill:'#7EE8D0' },
+  { name:'Gold',     min:16, max:20, fill:'#F2C94C' },
+  { name:'Silver',   min:21, max:30, fill:'#C7CDD3' },
+  { name:'Bronze',   min:31, max:40, fill:'#C08A52' },
+];
+const tierFor = (pos) => TIERS.find(t => pos <= t.max) || TIERS[TIERS.length - 1];
+const ordinal = (n) => { const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
+const fmt = (n) => Number(n).toLocaleString();
+const byNumber = (num) => DRIVERS.find(d => d.number === num);
+
+// Shared header markup (number plate, name, ratings, team/car, age/hometown, optional rank gem)
+function headerHTML(d, tier, showRank){
+  showRank = showRank !== false;
+  return `
+    <div class="head">
+      <div class="number-plate">${d.number}</div>
+      <div class="id"><div class="name">${d.name}</div></div>
+      <div class="ratings">
+        <div class="row"><div class="v">${d.iRating}</div><div class="l">IRATING</div></div>
+        <div class="row"><div class="v">${d.sr.toFixed(2)}</div><div class="l">SAFETY RATING</div></div>
+      </div>
+    </div>
+    <div class="subhead">
+      <div class="team"><b>${d.team}</b> · ${d.car}</div>
+      <div class="meta">Age ${d.age} · ${d.hometown}</div>
+    </div>
+    ${showRank ? `
+    <div class="rank">
+      <svg class="gem" viewBox="0 0 32 32"><polygon points="16,2 29,12 24,30 8,30 3,12" style="fill:${tier.fill}"/></svg>
+      <div class="rtext">
+        <div class="tier" style="color:${tier.fill}">${tier.name.toUpperCase()}</div>
+        <div class="pos">${ordinal(d.standingsPosition)} in season points</div>
+      </div>
+    </div>` : ''}`;
+}
+
+// Season-stats card (grid view)
+function cardHTML(d){
+  const tier = tierFor(d.standingsPosition);
+  return `
+  <div class="card" style="border-color:${tier.fill}" onclick="location.hash='driver-${d.number}'">
+    ${headerHTML(d, tier)}
+    <div class="headline">
+      <div><div class="n">${d.wins}</div><div class="l">WINS</div></div>
+      <div><div class="n">${d.top5}</div><div class="l">TOP 5</div></div>
+      <div><div class="n">${d.top10}</div><div class="l">TOP 10</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="l">Season starts</span><span class="v">15</span></div>
+      <div class="stat"><span class="l">Season points</span><span class="v">${fmt(d.points)}</span></div>
+      <div class="stat"><span class="l">Avg finish</span><span class="v">${d.avgFinish}</span></div>
+      <div class="stat"><span class="l">Avg start</span><span class="v">${d.avgStart}</span></div>
+      <div class="stat"><span class="l">Poles</span><span class="v">${d.poles}</span></div>
+      <div class="stat"><span class="l">Laps led</span><span class="v">${fmt(d.lapsLed)}</span></div>
+      <div class="stat"><span class="l">Total laps run</span><span class="v">${fmt(d.lapsRun)}</span></div>
+      <div class="stat"><span class="l">Incidents / race</span><span class="v">${d.incRace}</span></div>
+      <div class="stat"><span class="l">DNFs</span><span class="v hot">${d.dnfs}</span></div>
+      <div class="stat"><span class="l">Race wins in a row</span><span class="v good">${d.winsInARow}</span></div>
+    </div>
+    <div class="foot">THE LEGACY SERIES</div>
+  </div>`;
+}
+
+// Career-stats card (detail view), following the Career Stats card format
+// Tallies how many of a driver's seasons landed in each rank tier (Ruby..Bronze),
+// using the same per-season standing math as the Career Performance Log.
+function rankHistory(d){
+  const races = generateCareerLog(d);
+  const byTag = {};
+  races.forEach(r => { const tag = `${r.year} ${r.half}`; (byTag[tag] = byTag[tag] || []).push(r); });
+  const counts = {};
+  TIERS.forEach(t => { counts[t.name] = 0; });
+  Object.keys(byTag).forEach(tag => {
+    const [year, half] = tag.split(' ');
+    const s = seasonSummary(d, Number(year), half, byTag[tag]);
+    counts[s.tier.name]++;
+  });
+  return TIERS.map(t => ({ tier: t, count: counts[t.name] })).filter(r => r.count > 0);
+}
+
+function careerCardHTML(d){
+  const tier = tierFor(d.standingsPosition);
+  const c = d.career;
+  const chipRow = (arr, cls) => arr.length ? `<div class="chips">${arr.map(y=>`<span class="chip ${cls}">${y}</span>`).join('')}</div>` : `<div class="empty">—</div>`;
+  return `
+  <div class="card" style="border-color:#ffffff; cursor:default;">
+    ${headerHTML(d, tier, false)}
+    <div class="headline">
+      <div><div class="n">${c.wins}</div><div class="l">WINS</div></div>
+      <div><div class="n">${c.top5}</div><div class="l">TOP 5</div></div>
+      <div><div class="n">${c.top10}</div><div class="l">TOP 10</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="l">Career starts</span><span class="v">${fmt(c.starts)}</span></div>
+      <div class="stat"><span class="l">Career points</span><span class="v">${fmt(c.points)}</span></div>
+      <div class="stat"><span class="l">Avg finish</span><span class="v">${c.avgFinish}</span></div>
+      <div class="stat"><span class="l">Avg start</span><span class="v">${c.avgStart}</span></div>
+      <div class="stat"><span class="l">Poles</span><span class="v">${c.poles}</span></div>
+      <div class="stat"><span class="l">Laps led</span><span class="v">${fmt(c.lapsLed)}</span></div>
+      <div class="stat"><span class="l">Total laps run</span><span class="v">${fmt(c.lapsRun)}</span></div>
+      <div class="stat"><span class="l">Incidents / race</span><span class="v">${c.incRace}</span></div>
+      <div class="stat"><span class="l">DNFs</span><span class="v hot">${c.dnfs}</span></div>
+      <div class="stat"><span class="l">Longest win streak</span><span class="v good">${c.streak || '—'}</span></div>
+    </div>
+    <div class="section">
+      <div class="h">SEASON TITLES WON</div>
+      ${c.titles.length ? `<div class="chips">${c.titles.map(t=>`<span class="chip">${t}</span>`).join('')}</div>` : `<div class="empty">No titles yet</div>`}
+    </div>
+    <div class="section"><div class="h">CHAMPION OF THE YEAR</div>${chipRow(c.champion,'champ')}</div>
+    <div class="section"><div class="h">CLEANEST DRIVER AWARD</div>${chipRow(c.cleanest,'clean')}</div>
+    <div class="section"><div class="h">MOST IMPROVED DRIVER</div>${chipRow(c.mostImproved,'clean')}</div>
+    <div class="section"><div class="h">ROOKIE OF THE SEASON</div>${chipRow(c.rookie,'clean')}</div>
+    <div class="section">
+      <div class="h">RANKS ACHIEVED</div>
+      <div class="rank-history">
+        ${rankHistory(d).map(r => `
+          <div class="rank-chip">
+            <svg class="gem-sm" viewBox="0 0 32 32"><polygon points="16,2 29,12 24,30 8,30 3,12" style="fill:${r.tier.fill}"/></svg>
+            <span class="rank-chip-name" style="color:${r.tier.fill}">${r.tier.name}</span>
+            <span class="rank-chip-count">×${r.count}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="section">
+      <button class="log-btn" onclick="location.hash='log-${d.number}'">Career Performance Log &nearr;</button>
+    </div>
+    <div class="foot">THE LEGACY SERIES</div>
+  </div>`;
+}
+
+// --- Career Performance Log: simulates every race of a driver's career ---
+// Columns mirror an iRacing league event-result export: start/finish pos, status,
+// interval, laps led, laps completed, incidents, and points per race.
+const TRACKS = ["Daytona International Speedway","Talladega Superspeedway","Darlington Raceway","Bristol Motor Speedway",
+  "Martinsville Speedway","Richmond Raceway","Dover Motor Speedway","Charlotte Motor Speedway","Atlanta Motor Speedway",
+  "Texas Motor Speedway","Kansas Speedway","Las Vegas Motor Speedway","Homestead-Miami Speedway","Phoenix Raceway","Chicagoland Speedway"];
+const RACE_DISTANCE = 80; // laps, fixed for simulation
+const LEAGUE_CURRENT_YEAR = new Date().getFullYear(); // most recent season = this year
+
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function seededShuffle(arr, rand){
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+// Randomly generates a driver's season stats, career stats, standings position, rank,
+// and awards, all derived from one skill value so everything stays internally consistent.
+function pick(rand, arr, count){
+  const a = seededShuffle(arr, rand);
+  return a.slice(0, Math.min(count, a.length));
+}
+
+function generateStats(d){
+  const rand = mulberry32(Number(d.number) * 2654435761 + 97);
+
+  // Skill level drives every other number: 0 = back of the pack, 1 = series elite.
+  const skill = clamp(rand() * 0.55 + Math.pow(rand(), 1.6) * 0.45, 0, 1);
+  const t = skill; // drives every stat below; standingsPosition is assigned afterward from actual season points
+
+  const iRating = clamp(Math.round(1400 + t * 4300 + (rand() - 0.5) * 350), 900, 6000);
+  const sr = clamp(+(1.7 + t * 3.4 + (rand() - 0.5) * 0.5).toFixed(2), 1.0, 5.0);
+
+  const wins = clamp(Math.round(t * 9 + (rand() - 0.5) * 2), 0, 12);
+  let top10 = clamp(Math.round(t * 14 + (rand() - 0.5) * 3), wins, 15);
+  let top5 = clamp(Math.round(top10 * (0.5 + t * 0.35)), wins, top10);
+  const avgFinish = +(4 + (1 - t) * 19 + (rand() - 0.5) * 2).toFixed(1);
+  const avgStart = +(avgFinish + (rand() - 0.5) * 2.5).toFixed(1);
+  const poles = clamp(Math.round(t * 7 + (rand() - 0.5) * 2), 0, 10);
+  const lapsLed = clamp(Math.round(t * 950 + rand() * 120), 0, 1200);
+  const lapsRun = Math.round(2050 + rand() * 450);
+  const incRace = +(0.5 + (1 - t) * 5.2 + (rand() - 0.5) * 0.5).toFixed(1);
+  const dnfs = clamp(Math.round((1 - t) * 7 + rand() * 2), 0, 9);
+  const winsInARow = wins > 0 ? clamp(Math.round(rand() * Math.min(wins, 4)), 0, wins) : 0;
+  const points = Math.round(850 + t * 2650 + rand() * 250);
+
+  // Career: scale season-level performance across however many seasons this driver has raced.
+  const yearsActive = clamp(Math.round(1 + rand() * 9), 1, 10);
+  const seasons = yearsActive * 2;
+  const spread = () => 0.55 + rand() * 0.55;
+  let cWins = Math.round(wins * seasons * spread() * 0.6);
+  let cTop5 = Math.max(cWins, Math.round(top5 * seasons * spread() * 0.6));
+  let cTop10 = Math.max(cTop5, Math.round(top10 * seasons * spread() * 0.6));
+  const starts = seasons * 15;
+  cTop10 = Math.min(cTop10, starts);
+  cTop5 = Math.min(cTop5, cTop10);
+  cWins = Math.min(cWins, cTop5);
+  const career = {
+    wins: cWins, top5: cTop5, top10: cTop10, starts,
+    points: Math.round(points * seasons * (0.85 + rand() * 0.3)),
+    avgFinish: +(avgFinish + (rand() - 0.5) * 1.5).toFixed(1),
+    avgStart: +(avgStart + (rand() - 0.5) * 1.5).toFixed(1),
+    poles: Math.min(starts, Math.round(poles * seasons * spread() * 0.5)),
+    lapsLed: Math.round(lapsLed * seasons * spread() * 0.5),
+    lapsRun: Math.round(lapsRun * seasons * (0.97 + rand() * 0.06)),
+    incRace: +(incRace + (rand() - 0.5) * 0.4).toFixed(1),
+    dnfs: Math.round(dnfs * seasons * spread() * 0.6),
+    streak: cWins > 0 ? `${clamp(Math.round(winsInARow + rand() * 3), 1, 8)} in a row` : null,
+  };
+
+  // Awards. Season titles and Champion of the Year are derived from the driver's actual
+  // simulated per-season standing (same formula seasonSummary uses) so a 1st-place finish
+  // in the standings always shows up as a title — never randomly skipped or invented.
+  const seasonTags = [];
+  for (let k = 1; k <= yearsActive; k++){
+    const year = LEAGUE_CURRENT_YEAR - yearsActive + k;
+    seasonTags.push(`${year} Winter`, `${year} Summer`);
+  }
+
+  const races = generateCareerLog({ number: d.number, yearsActive, career });
+  const byTag = {};
+  races.forEach(r => {
+    const tag = `${r.year} ${r.half}`;
+    (byTag[tag] = byTag[tag] || []).push(r);
+  });
+  const titles = seasonTags.filter(tag => {
+    const list = byTag[tag];
+    if (!list || !list.length) return false;
+    const avgFin = list.reduce((s, r) => s + r.finish, 0) / list.length;
+    const [yr, half] = tag.split(' ');
+    const seasonRand = mulberry32(Number(d.number) * 31 + Number(yr) * 7 + (half === 'Summer' ? 3 : 1));
+    return clamp(Math.round(avgFin + (seasonRand() - 0.5) * 5), 1, 40) === 1;
+  });
+  career.titles = titles;
+
+  const years = [...new Set(seasonTags.map(s => s.split(' ')[0]))];
+  career.champion = years.filter(y => titles.includes(`${y} Winter`) && titles.includes(`${y} Summer`));
+
+  const cleanCount = incRace < 2 ? Math.round(rand() * 2) : (incRace < 3.2 ? Math.round(rand()) : 0);
+  career.cleanest = pick(rand, seasonTags, cleanCount).sort();
+
+  const improvedCount = (yearsActive >= 2 && rand() < 0.35) ? 1 : 0;
+  career.mostImproved = improvedCount ? pick(rand, seasonTags.slice(0, 4), 1) : [];
+
+  const firstYearTags = seasonTags.slice(0, 2);
+  const rookieCount = (yearsActive <= 3 && rand() < 0.5) ? 1 : 0;
+  career.rookie = rookieCount ? pick(rand, firstYearTags, 1) : [];
+
+  // Note: wins/top5/top10/poles/points/avgFinish/avgStart/lapsLed/lapsRun/incRace/dnfs/
+  // winsInARow above are only used to scale the career totals — the actual *current*
+  // season stats are filled in afterward by simulateCurrentSeason, which runs real
+  // head-to-head races across the whole field so race-winner math stays honest
+  // (15 races a season means at most 15 total wins can exist across every driver).
+  return { iRating, sr, skill, yearsActive, career };
+}
+
+DRIVERS.forEach(d => Object.assign(d, generateStats(d)));
+
+// Simulate the actual current 15-race season across the whole field, race by race, so
+// wins/poles/top-fives can never add up to more than the field actually raced for.
+const RACES_PER_SEASON = 15;
+function simulateCurrentSeason(drivers){
+  const totals = {};
+  drivers.forEach(d => {
+    d._rand = mulberry32(Number(d.number) * 2246822519 + 811);
+    totals[d.number] = { wins:0, top5:0, top10:0, poles:0, points:0, lapsLed:0, lapsRun:0, incTotal:0, dnfs:0, finishSum:0, startSum:0, streak:0, bestStreak:0 };
+  });
+
+  for (let race = 0; race < RACES_PER_SEASON; race++){
+    // Qualifying determines the starting grid.
+    const grid = drivers.map(d => ({ d, score: d.skill + (d._rand() - 0.5) * 0.5 }))
+      .sort((a, b) => b.score - a.score);
+    const startPos = {};
+    grid.forEach((g, i) => { startPos[g.d.number] = i + 1; });
+
+    // The race itself: skill plus race-day variance, with a small DNF chance.
+    const results = drivers.map(d => {
+      const dnfChance = 0.015 + (1 - d.skill) * 0.045;
+      const isDNF = d._rand() < dnfChance;
+      const score = isDNF ? -1 - d._rand() : d.skill + (d._rand() - 0.5) * 0.65;
+      return { d, score, isDNF };
+    }).sort((a, b) => b.score - a.score);
+
+    results.forEach((r, i) => {
+      const d = r.d, a = totals[d.number];
+      const finish = i + 1, start = startPos[d.number];
+      a.finishSum += finish; a.startSum += start;
+      if (finish === 1) a.wins++;
+      if (finish <= 5) a.top5++;
+      if (finish <= 10) a.top10++;
+      if (start === 1) a.poles++;
+      a.points += Math.max(1, Math.round(43 - (finish - 1) * 0.95 - d._rand() * 2));
+      a.incTotal += Math.max(0, Math.round((1 - d.skill) * 4 + d._rand() * 3));
+      if (r.isDNF){ a.dnfs++; a.lapsRun += Math.round(RACE_DISTANCE * (0.1 + d._rand() * 0.7)); }
+      else { a.lapsRun += RACE_DISTANCE; }
+      if (finish === 1) a.lapsLed += Math.round(25 + d._rand() * 45);
+      else if (d._rand() < 0.1) a.lapsLed += Math.round(d._rand() * 10);
+      if (finish === 1){ a.streak++; a.bestStreak = Math.max(a.bestStreak, a.streak); } else { a.streak = 0; }
+    });
+  }
+
+  drivers.forEach(d => {
+    const a = totals[d.number];
+    Object.assign(d, {
+      wins: a.wins, top5: a.top5, top10: a.top10, poles: a.poles, points: a.points,
+      lapsLed: a.lapsLed, lapsRun: a.lapsRun, dnfs: a.dnfs, winsInARow: a.bestStreak,
+      incRace: +(a.incTotal / RACES_PER_SEASON).toFixed(1),
+      avgFinish: +(a.finishSum / RACES_PER_SEASON).toFixed(1),
+      avgStart: +(a.startSum / RACES_PER_SEASON).toFixed(1),
+    });
+    delete d._rand;
+  });
+}
+simulateCurrentSeason(DRIVERS);
+
+// Standings come straight out of that simulated season's points.
+DRIVERS.sort((a, b) => b.points - a.points).forEach((d, i) => { d.standingsPosition = i + 1; });
+
+function generateCareerLog(d){
+  const c = d.career;
+  const totalSeasons = d.yearsActive * 2;
+  const totalRaces = totalSeasons * 15;
+  const rand = mulberry32(Number(d.number) * 7919 + 13);
+
+  const order = seededShuffle([...Array(totalRaces).keys()], rand);
+  const winSet  = new Set(order.slice(0, Math.min(c.wins, totalRaces)));
+  const rest1   = order.slice(c.wins);
+  const poleSet = new Set(rest1.slice(0, Math.min(c.poles, rest1.length)));
+  const rest2   = rest1.slice(c.poles);
+  const dnfSet  = new Set(rest2.slice(0, Math.min(c.dnfs, rest2.length)));
+
+  let lapsLedBudget = c.lapsLed;
+  const races = [];
+  for (let i = 0; i < totalRaces; i++){
+    const yearIndex = Math.floor(i / 30) + 1; // 1-based, within this driver's career
+    const actualYear = LEAGUE_CURRENT_YEAR - totalSeasons / 2 + yearIndex;
+    const half = (i % 30 < 15) ? 'Winter' : 'Summer';
+    const week = (i % 15) + 1;
+    const track = TRACKS[i % 15];
+    const isWin = winSet.has(i), isPole = poleSet.has(i), isDNF = dnfSet.has(i);
+
+    const start = isPole ? 1 : clamp(Math.round(c.avgStart + (rand() - 0.5) * 12), 1, 40);
+    let finish, status = 'Running', lapsComp = RACE_DISTANCE;
+    if (isWin){ finish = 1; }
+    else if (isDNF){ finish = clamp(Math.round(18 + rand() * 22), 1, 40); status = 'DNF'; lapsComp = Math.round(RACE_DISTANCE * (0.1 + rand() * 0.7)); }
+    else { finish = clamp(Math.round(c.avgFinish + (rand() - 0.5) * 9), 1, 40); }
+
+    const inc = Math.max(0, Math.round(c.incRace + (rand() - 0.5) * 3));
+    let lapsLed = 0;
+    if (isWin && lapsLedBudget > 0){ lapsLed = Math.min(lapsLedBudget, Math.round(10 + rand() * 45)); lapsLedBudget -= lapsLed; }
+    else if (rand() < 0.15 && lapsLedBudget > 0){ lapsLed = Math.min(lapsLedBudget, Math.round(rand() * 15)); lapsLedBudget -= lapsLed; }
+
+    const interval = finish === 1 ? '—' : (status === 'DNF' ? `${Math.max(1, RACE_DISTANCE - lapsComp)} Laps Down` : `-${(rand() * 24 + 0.3).toFixed(2)}s`);
+    const points = Math.max(1, Math.round(43 - (finish - 1) * 0.95 - rand() * 2));
+
+    races.push({ year: actualYear, half, week, track, start, finish, status, interval, lapsLed, lapsComp, inc, points });
+  }
+  return races;
+}
+
+const lastName = (full) => full.trim().split(/\s+/).slice(-1)[0];
+const SORTS = {
+  name:   { label: 'Sort: A–Z (Last Name)',       fn: (a,b) => lastName(a.name).localeCompare(lastName(b.name)) },
+  number: { label: 'Sort: Car Number (Low–High)', fn: (a,b) => Number(a.number) - Number(b.number) },
+  rank:   { label: 'Sort: Rank (Ruby–Bronze)',     fn: (a,b) => a.standingsPosition - b.standingsPosition },
+  default:{ label: 'Sort: Standings',             fn: (a,b) => a.standingsPosition - b.standingsPosition },
+};
+
+function renderList(sortKey){
+  sortKey = sortKey || 'default';
+  document.getElementById('intro').textContent = "Click any driver card to open that racer's career statistics. Swap or add entries in DRIVERS at the top of the script to generate a card per racer.";
+  const sorted = [...DRIVERS].sort(SORTS[sortKey].fn);
+  document.getElementById('app').innerHTML = `
+    <div class="list-header"><h1>Current Season Driver Cards</h1></div>
+    <div class="legend">
+      ${TIERS.map(t => `
+        <div class="legend-item">
+          <svg class="gem-sm" viewBox="0 0 32 32"><polygon points="16,2 29,12 24,30 8,30 3,12" style="fill:${t.fill}"/></svg>
+          <span style="color:${t.fill}">${t.name}</span>
+          <span class="legend-range">${ordinal(t.min)}–${ordinal(t.max)}</span>
+        </div>`).join('')}
+    </div>
+    <div class="controls">
+      <button class="sort-btn" id="sortBtn" aria-haspopup="true" aria-expanded="false">
+        <span id="sortLabel">${SORTS[sortKey].label}</span>
+        <svg width="10" height="6" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6z" fill="currentColor"/></svg>
+      </button>
+      <div class="sort-menu" id="sortMenu">
+        <button data-sort="name">A–Z (Last Name)</button>
+        <button data-sort="number">Car Number (Low–High)</button>
+        <button data-sort="rank">Rank (Ruby–Bronze)</button>
+      </div>
+    </div>
+    <div class="grid">${sorted.map(cardHTML).join('')}</div>`;
+
+  const sortBtn = document.getElementById('sortBtn');
+  const sortMenu = document.getElementById('sortMenu');
+  sortBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = sortMenu.classList.toggle('open');
+    sortBtn.setAttribute('aria-expanded', open);
+  });
+  sortMenu.querySelectorAll('button[data-sort]').forEach(btn => {
+    btn.addEventListener('click', () => renderList(btn.dataset.sort));
+  });
+  document.addEventListener('click', () => {
+    sortMenu.classList.remove('open');
+    sortBtn.setAttribute('aria-expanded', 'false');
+  }, { once:true });
+}
+
+function renderDetail(d){
+  document.getElementById('intro').textContent = '';
+  document.getElementById('app').innerHTML = `
+    <div class="detail-wrap">
+      <button class="back-link" onclick="location.hash=''">&larr; All Drivers</button>
+      <div class="list-header"><h1>Career Total Driver Cards</h1></div>
+      <div class="page-title">
+        <h1>The Legacy Series Driver Card</h1>
+        <p>CAREER STATS · ${d.yearsActive} YEARS</p>
+      </div>
+      ${careerCardHTML(d)}
+    </div>`;
+}
+
+function seasonSummary(d, year, half, list){
+  const c = d.career;
+  const wins = list.filter(r => r.finish === 1).length;
+  const top5 = list.filter(r => r.finish <= 5).length;
+  const top10 = list.filter(r => r.finish <= 10).length;
+  const points = list.reduce((s,r) => s + r.points, 0);
+  const lapsLed = list.reduce((s,r) => s + r.lapsLed, 0);
+  const lapsRun = list.reduce((s,r) => s + r.lapsComp, 0);
+  const incTotal = list.reduce((s,r) => s + r.inc, 0);
+  const dnfs = list.filter(r => r.status === 'DNF').length;
+  const avgFinish = list.reduce((s,r) => s + r.finish, 0) / list.length;
+
+  const tag = `${year} ${half}`;
+  // Champion of the Year requires finishing P1 in the standings both seasons of that year,
+  // so the P1 result applies to Winter and Summer alike even though the title is awarded once.
+  const isChampionshipYear = c.champion.includes(String(year));
+  const isSeasonTitle = c.titles.includes(tag);
+
+  const awards = [];
+  if (isSeasonTitle) awards.push('Season Title');
+  if (half === 'Summer' && isChampionshipYear) awards.push('Champion of the Year');
+  if (c.cleanest.includes(tag)) awards.push('Cleanest Driver Award');
+  if (c.mostImproved.includes(tag)) awards.push('Most Improved Driver');
+  if (c.rookie.includes(tag)) awards.push('Rookie of the Season');
+
+  // A season title or a full-year championship means this driver topped the standings that season.
+  let standing, tier;
+  if (isSeasonTitle || isChampionshipYear){
+    standing = 1; tier = TIERS[0];
+  } else {
+    const rand = mulberry32(Number(d.number) * 31 + year * 7 + (half === 'Summer' ? 3 : 1));
+    standing = clamp(Math.round(avgFinish + (rand() - 0.5) * 5), 1, 40);
+    tier = tierFor(standing);
+  }
+
+  return { wins, top5, top10, points, lapsLed, lapsRun, incTotal, dnfs, standing, tier, awards };
+}
+
+function renderLog(d){
+  document.getElementById('intro').textContent = '';
+  const races = generateCareerLog(d);
+
+  const byYear = {};
+  races.forEach(r => {
+    byYear[r.year] = byYear[r.year] || { Winter: [], Summer: [] };
+    byYear[r.year][r.half].push(r);
+  });
+  const years = Object.keys(byYear).map(Number).sort((a, b) => b - a); // newest first
+
+  const tableRows = (list) => list.map(r => `
+    <tr class="${r.status === 'DNF' ? 'dnf' : ''}">
+      <td>${r.week}</td><td>${r.track}</td><td>${r.start}</td><td>${r.finish}</td><td>${r.status}</td>
+      <td>${r.interval}</td><td>${r.lapsLed}</td><td>${r.lapsComp}</td><td>${r.inc}</td><td>${r.points}</td>
+    </tr>`).join('');
+
+  const seasonBlock = (year, half, list) => {
+    if (!list.length) return '';
+    const s = seasonSummary(d, year, half, list);
+    const awardText = s.awards.length ? s.awards.join(', ') : 'No award this season';
+    return `
+    <details class="season-acc">
+      <summary>
+        <span class="s-name">${half} ${year}</span>
+        <span class="s-stats">
+          <b>${s.wins}</b> Win${s.wins === 1 ? '' : 's'} · <b>${s.top5}</b> Top 5${s.top5 === 1 ? '' : 's'} ·
+          <b>${s.top10}</b> Top Ten${s.top10 === 1 ? '' : 's'} · <b>${fmt(s.points)}</b> Total Points ·
+          <span style="color:${s.tier.fill}">${ordinal(s.standing)} · ${s.tier.name}</span>
+        </span>
+        <span class="count">${list.length} races</span>
+      </summary>
+      <div class="log-table-wrap">
+        <table class="log-table">
+          <thead><tr><th>Wk</th><th>Track</th><th>Start</th><th>Fin</th><th>Status</th><th>Interval</th><th>Laps Led</th><th>Laps Comp</th><th>Inc</th><th>Pts</th></tr></thead>
+          <tbody>${tableRows(list)}</tbody>
+          <tfoot><tr class="totals-row"><td colspan="10">
+            <div class="season-totals">
+              <span><b>${s.wins}</b> Wins · <b>${s.top5}</b> Top 5 · <b>${s.top10}</b> Top 10 · <b>${fmt(s.points)}</b> Pts</span>
+              <span><b>${fmt(s.lapsLed)}</b> Laps Led · <b>${fmt(s.lapsRun)}</b> Laps Run · <b>${s.incTotal}</b> Inc Pts · <b>${s.dnfs}</b> DNFs</span>
+              <span>Final standing: <b>${ordinal(s.standing)}</b></span>
+              <span>Final rank: <b style="color:${s.tier.fill}">${s.tier.name.toUpperCase()}</b></span>
+              <span class="${s.awards.length ? 'award-yes' : 'award-no'}">${awardText}</span>
+            </div>
+          </td></tr></tfoot>
+        </table>
+      </div>
+    </details>`;
+  };
+
+  const yearBlocks = years.map((y, idx) => `
+    <details class="year-acc" ${idx === 0 ? 'open' : ''}>
+      <summary>${y} Season <span class="count">${byYear[y].Winter.length + byYear[y].Summer.length} races</span></summary>
+      <div class="year-body">
+        ${seasonBlock(y, 'Winter', byYear[y].Winter)}
+        ${seasonBlock(y, 'Summer', byYear[y].Summer)}
+      </div>
+    </details>`).join('');
+
+  document.getElementById('app').innerHTML = `
+    <div class="log-wrap">
+      <button class="back-link" onclick="location.hash='driver-${d.number}'">&larr; ${d.name}'s Career Card</button>
+      <div class="page-title">
+        <h1>#${d.number} ${d.name} — Career Performance Log</h1>
+        <p>${years[years.length-1]}–${years[0]} · ${races.length} RACES SIMULATED · EVERY WINTER &amp; SUMMER SEASON, 15 RACES EACH</p>
+      </div>
+      ${yearBlocks}
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+function route(){
+  const hash = location.hash.replace('#','');
+  if (hash.startsWith('driver-')){
+    const d = byNumber(hash.replace('driver-',''));
+    if (d){ renderDetail(d); window.scrollTo(0,0); return; }
+  }
+  if (hash.startsWith('log-')){
+    const d = byNumber(hash.replace('log-',''));
+    if (d){ renderLog(d); return; }
+  }
+  renderList(window.__lastSort);
+}
+
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
